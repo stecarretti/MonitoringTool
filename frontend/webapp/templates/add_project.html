@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+    <br>
+    <form method="POST" target="{{ url_for('logging') }}" autocomplete="off" enctype="multipart/form-data">
+        <h5>Insert the number of your project</h5>
+        <input type="hidden" name="hidden_username" value="{{ user_id }}">
+        <input type="text" name="number" placeholder="Project number"><br><br>
+        <h5>Insert the service account file of your project</h5>
+        <input type="file" name="key_file"><br><br>
+        <h5>Insert where you want to put breakpoints. Each line must contain a single breakpoint</h5>
+        <h6>Format: filename.py:line_number<br><br>
+        Example:</h6>
+        main.py:39<br>
+        answer.py:42<br>
+        <textarea name="breakpoints" rows="10" cols="30"></textarea>
+        <br><br><input type="submit" value="Submit ">
+    </form>
+{% endblock %}

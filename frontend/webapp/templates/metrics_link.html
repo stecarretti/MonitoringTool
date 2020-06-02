@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Link{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+    <br><br><br>
+    <div class="p-3 mb-2 bg-light text-dark centered">
+        <a href="{{ link }}" class="text-info">Metrics page link</a>
+    </div>
+{% endblock %}

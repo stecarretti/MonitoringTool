@@ -1,0 +1,157 @@
+swagger: "2.0"
+
+info:
+  title: "Debugger-based Monitoring"
+  description: "An application for the monitoring of other applications"
+  version: "1.0.0"
+
+host: "debuggerbasedmonitoring.appspot.com"
+basePath: "/api/v1"
+
+schemes:
+    - "https"
+paths:
+    /breakpoints/{user_id}/{project_id}:
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        description: 'Identifier of the user'
+        type: string
+      - name: project_id
+        in: path
+        required: true
+        description: 'Identifier of the project'
+        type: string
+      post:
+        description: "Insert a new breakpoint"
+        operationId: "postBreakpoint"
+        consumes:
+          - application/json
+        parameters:
+          - in: body
+            name: content
+            description: "Breakpoint's info"
+            schema:
+              type: string
+            required: true
+        responses:
+          201:
+            description: "Success."
+          400:
+            description: "Invalid or missing user_id or project_id"
+          409:
+            description: "Invalid breakpoint's info"
+      get:
+        description: "Fetch all the breakpoints"
+        operationId: "getBreakpoints"
+        responses:
+          200:
+            description: "Success."
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: string
+          400:
+            description: "Invalid or missing user_id or project_id"
+    /snapshots/{user_id}/{project_id}:
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: 'Identifier of the user'
+          type: string
+        - name: project_id
+          in: path
+          required: true
+          description: 'Identifier of the project'
+          type: string
+      get:
+        description: "Fetch all snapshots id"
+        operationId: "getSnapshots"
+        responses:
+          200:
+            description: "Success"
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: string
+          400:
+            description: "Invalid or missing user_id or project_id"
+    /snapshots/{user_id}/{project_id}/{snapshot_id}:
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: 'Identifier of the user'
+          type: string
+        - name: project_id
+          in: path
+          required: true
+          description: 'Identifier of the project'
+          type: string
+        - name: snapshot_id
+          in: path
+          required: true
+          description: 'Identifier of the snapshot'
+          type: string
+      get:
+        description: "Fetch the snapshot"
+        operationId: "getSnapshot"
+        responses:
+          200:
+            description: "Success"
+            schema:
+              type: object
+              properties:
+                breakpoint:
+                  type: string
+                  description: "Identifier fo the breakpoint"
+                create_final:
+                  type: string
+                  description: "Create time plus final time"
+                ip_address:
+                  type: string
+                  description: "Ip address of the user that triggered the snapshot"
+          400:
+            description: "Invalid or missing user_id or project_id"
+          404:
+            description: "Snapshot not found"
+    /measurements/{user_id}/{project_id}:
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: 'Identifier of the user'
+          type: string
+        - name: project_id
+          in: path
+          required: true
+          description: 'Identifier of the project'
+          type: string
+      post:
+        description: "Update measurements settings"
+        operationId: "postMeasurements"
+        consumes:
+          - application/json
+        parameters:
+          - in: body
+            name: setting
+            required: true
+            description: "New setting of the measurements"
+            schema:
+              type: string
+              enum: [start, stop]
+        responses:
+          201:
+            description: "Success."
+          400:
+            description: "Invalid or missing user_id or project_id"
+          409:
+            description: "Invalid input data"

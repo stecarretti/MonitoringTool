@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% block title %}Metrics{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        #mean_canvas{background: #ffffff;
+            box-shadow:5px 5px 5px #4984de;
+            border:5px solid #eee;
+            margin-bottom:10px;}
+        .leftside, .rightside {
+            height: 400px;
+            width: 100%;
+        }
+        #right_div{
+            position: relative;
+            float: right;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <br>
+    <h3>User: <span style="color:#0947a7"> {{ user_id }}</span></h3>
+    <h3>Project: <span style="color:#0947a7"> {{ project_id }}</span></h3><br>
+    <h5><kbd class="minor_kbd">When your application is used</kbd></h5>
+    <h6>X axis: hours in a day, from 0 to 23</h6>
+    <h6>Y axis: how much your application is used.</h6>
+    <pre><h6>Min value: 0       Max value: 1</h6></pre>
+    <canvas id="mean_canvas" height="400" width="950">
+    </canvas><br>
+    <h4><a href="{{ url_for('plots', user_id=user_id, project_id=project_id) }}">View one plot for each week day</a></h4><br>
+    <script type="text/javascript">
+        var canvas ;
+        var context ;
+        var Val_Max;
+        var Val_Min;
+        var sections;
+        var xScale;
+        var yScale;
+        var y;
+        // values of each item on the graph
+        var weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        var itemName = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']
+        // var itemValue = [0.009615384615384616, 0, 0.012285012285012284, 0, 0, 0, 0, 0, 0, 0, 0, 0.0005934718100890207, 0.0011741682974559687, 0.006510416666666667, 0, 0.02777777777777776, 0.014308426073131956, 0.04615384615384615, 0.020887728459530026, 0.0007472445357743321, 0, 0.014084507042253521, 0.005045726900031536, 0];
+        var itemValue = {{ mean_graph }}
+            {#var itemValue = []#}
+            {#for(var key in itemDict) {#}
+            {#    itemValue.push(itemDict[key]);#}
+            {##}
+
+
+            // intialize values for each variables
+
+            sections = 24;
+        Val_Max = Math.max.apply(null, itemValue);
+        var columnSize = 50;
+        var rowSize = 60;
+        var margin = 10;
+
+        canvas = document.getElementById("mean_canvas");
+        context = canvas.getContext("2d");
+        context.fillStyle = "#000;"
+
+        yScale = (canvas.height - columnSize - 4 * margin) / (Val_Max);
+        xScale = (canvas.width - rowSize) / (sections + 1);
+
+        context.beginPath();
+
+        // print values of each data entry
+        context.font = "20 pt Verdana";
+        context.textBaseline="bottom";
+        for (i=0;i<sections;i++) {
+            computeHeight(itemValue[i]);
+            context.fillText(itemValue[i], xScale * (i+1), y - 4 * margin);
+        }
+
+        context.closePath()
+        context.beginPath();
+
+        // print names of each data entry
+        context.font = "20 pt Verdana";
+        context.textBaseline="bottom";
+        for (i=0;i<sections;i++) {
+            context.fillText(itemName[i], xScale * (i+1), canvas.height - margin);
+        }
+
+        // translate to bottom of graph in order to match the data
+        context.save();
+        context.translate(0,canvas.height - 4 * margin);
+        context.scale(xScale,-1 * yScale);
+
+        // draw each graph bars
+        context.fillStyle = "#1257bf";
+        for (i=0;i<sections;i++) {
+            context.fillRect(i + 1, 0, 0.3, itemValue[i]);
+        }
+
+        // draw x-axis line
+        context.closePath();
+        context.restore();
+        context.beginPath();
+        context.moveTo(xScale, canvas.height - 3 * margin);
+        context.lineTo(xScale * (sections+1), canvas.height - 3 * margin);
+        context.strokeStyle = "#000";
+        context.stroke();
+
+
+
+        function computeHeight(value) {
+            y = canvas.height - value * yScale ;
+        }
+    </script>
+    <script type="text/javascript">
+
+        function drawPieSlice(ctx,centerX, centerY, radius, startAngle, endAngle, color ){
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(centerX,centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        var Piechart = function(options){
+            this.options = options;
+            this.canvas = options.canvas;
+            this.ctx = this.canvas.getContext("2d");
+            this.colors = options.colors;
+
+            this.draw = function(){
+                var total_value = 0;
+                var color_index = 0;
+                for (var categ in this.options.data){
+                    var val = this.options.data[categ];
+                    total_value += val;
+                }
+
+                var start_angle = 0;
+                for (categ in this.options.data){
+                    val = this.options.data[categ];
+                    var slice_angle = 2 * Math.PI * val / total_value;
+
+                    drawPieSlice(
+                        this.ctx,
+                        this.canvas.width/2,
+                        this.canvas.height/2,
+                        Math.min(this.canvas.width/2,this.canvas.height/2),
+                        start_angle,
+                        start_angle+slice_angle,
+                        this.colors[color_index%this.colors.length]
+                    );
+
+                    start_angle += slice_angle;
+                    color_index++;
+                }
+                start_angle = 0;
+                for (categ in this.options.data){
+                    val = this.options.data[categ];
+                    slice_angle = 2 * Math.PI * val / total_value;
+                    var pieRadius = Math.min(this.canvas.width/2,this.canvas.height/2);
+                    var labelX = this.canvas.width/2 + (pieRadius / 2) * Math.cos(start_angle + slice_angle/2);
+                    var labelY = this.canvas.height/2 + (pieRadius / 2) * Math.sin(start_angle + slice_angle/2);
+
+                    if (this.options.doughnutHoleSize){
+                        var offset = (pieRadius * this.options.doughnutHoleSize ) / 2;
+                        labelX = this.canvas.width/2 + (offset + pieRadius / 2) * Math.cos(start_angle + slice_angle/2);
+                        labelY = this.canvas.height/2 + (offset + pieRadius / 2) * Math.sin(start_angle + slice_angle/2);
+                    }
+
+                    var labelText = Math.round(100 * val / total_value);
+                    this.ctx.fillStyle = "white";
+                    this.ctx.font = "bold 20px Arial";
+                    this.ctx.fillText(labelText+"%", labelX,labelY);
+                    start_angle += slice_angle;
+                }
+                if (this.options.legend){
+                    color_index = 0;
+                    var legendHTML = "";
+                    for (categ in this.options.data){
+                        legendHTML += "<div><span style='display:inline-block;width:20px;background-color:"+this.colors[color_index++]+";'>&nbsp;</span> "+categ+"</div>";
+                    }
+                    this.options.legend.innerHTML = legendHTML;
+                }
+
+            }
+        }
+    </script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type=text/javascript>
+        $(function() {
+            $('a#stop').bind('click', function() {
+                $.getJSON('/stop_measurements/{{ user_id }}/{{ project_id }}',
+                    function(data) {
+                    });
+                document.getElementById("confirm_stop").innerHTML = 'Measurements stopped';
+                document.getElementById("confirm_start").innerHTML = '';
+                return false;
+            });
+        });
+        $(function() {
+            $('a#start').bind('click', function() {
+                $.getJSON('/start_measurements/{{ user_id }}/{{ project_id }}',
+                    function(data) {
+                    });
+                document.getElementById("confirm_start").innerHTML = 'Measurements started';
+                document.getElementById("confirm_stop").innerHTML = '';
+                return false;
+            });
+        });
+    </script>
+    <br><br>
+    <div class="row no-gutters">
+        <div class="col no-gutters">
+            <div class="leftside">
+                <h5><kbd class="minor_kbd">Where your application is used</kbd></h5>
+                <canvas id="countryCanvas"></canvas>
+                <div id="countryLegend"></div>
+            </div>
+        </div>
+        <div class="col no-gutters">
+            <div class="rightside">
+                <h5><kbd class="minor_kbd">Which breakpoints are triggered</kbd></h5>
+                <canvas id="breakpointCanvas"></canvas>
+                <div id="breakpointLegend"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var myCanvas = document.getElementById("countryCanvas");
+        myCanvas.width = 200;
+        myCanvas.height = 200;
+
+        var myLegend = document.getElementById("countryLegend");
+        var myPiechart = new Piechart({
+            canvas: myCanvas,
+            data: {{ countries|tojson }},
+            // ToDo: automatically select colors given a variable number of countries
+            colors: ["#ffdf00", "#57d9ff", "rgb(252,3,31)", "#FF8E35", "#0D14FF", "#E73FFF"],
+            legend: myLegend
+        });
+        myPiechart.draw()
+    </script>
+
+    <script type="text/javascript">
+        var myCanvas = document.getElementById("breakpointCanvas");
+        myCanvas.width = 200;
+        myCanvas.height = 200;
+
+        var myLegend = document.getElementById("breakpointLegend");
+        var myPiechart = new Piechart({
+            canvas: myCanvas,
+            data: {{ breakpoints|tojson }},
+            colors: ["rgb(252,3,31)", "rgb(87,217,255)", "rgb(255,253,62)", "#FF8E35", "#0D14FF", "#E73FFF"],
+            legend: myLegend
+        });
+        myPiechart.draw()
+    </script>
+    <br><h6>If you want to stop the measurements, click Stop</h6>
+    <div class='container'>
+        <form>
+            <a href=# id=stop><button class='btn btn-secondary btn-sm'>Stop</button></a>
+        </form>
+        <p id="confirm_stop"></p>
+    </div>
+    <br><h6>If you want to restart the measurements, click Start</h6>
+    <div class='container'>
+        <form>
+            <a href=# id=start><button class='btn btn-secondary btn-sm'>Start</button></a>
+        </form>
+        <p id="confirm_start"></p>
+    </div>
+    <br>
+    <br><a href="{{ url_for('add_project', user_id=user_id) }}" role="button" class="btn btn-info">Add new project</a>
+    <div id="right_div">
+        <form action="{{ url_for('delete_project', user_id=user_id, project_id=project_id) }}" target="_self">
+            <input type="submit" value="Delete project" class="btn btn-danger"
+                   onclick="return confirm('Are you sure you want to delete your project?')"/>
+        </form>
+    </div>
+{% endblock %}

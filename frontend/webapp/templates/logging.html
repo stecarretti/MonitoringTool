@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Logging{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+    <br>
+    <form method="POST" target="{{ url_for('logging') }}" autocomplete="off" enctype="multipart/form-data">
+        <h5>Insert your username (must be unique and composed by a single word) and the number of your project</h5>
+        <input type="text" name="username" placeholder="Username"><br>
+        <input type="text" name="number" placeholder="Project number"><br><br>
+        <h5>Select your timezone</h5>
+        <select name="tz">
+            {% for tz in tzs %}
+                <option>{{ tz }}</option>
+            {% endfor %}
+        </select><br><br>
+        <h5>Insert the service account file of your project</h5>
+        <input type="file" name="key_file"><br><br>
+        <h5>Insert where you want to put breakpoints. Each line must contain a single breakpoint</h5>
+        <h6>Format: filename.py:line_number<br><br>
+            Example:</h6>
+        main.py:39<br>
+        answer.py:42<br>
+        <textarea name="breakpoints" rows="10" cols="30"></textarea>
+        <br><br><input type="submit" class="btn btn-light btn-sm" value="Submit ">
+    </form>
+{% endblock %}

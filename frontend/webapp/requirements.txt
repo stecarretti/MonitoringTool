@@ -1,0 +1,8 @@
+flask
+google-cloud-firestore
+google-api-python-client
+numpy
+google-auth
+google-auth-httplib2
+urllib3
+pytz
