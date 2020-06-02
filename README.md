@@ -1,2 +1,10 @@
 # MonitoringTool
-Tool with the aim to monitor users' web application deployed with Google Cloud Platform
+## This tool exploits the functionalities of Cloud Debugger API in order to create metrics about how, how much, when and where any web application deployed with GCP is used
+## GCP's Services List
+- Compute Engine
+- App Engine
+- Cloud Functions
+- Cloud Firestore
+- Cloud Endpoints
+
+
