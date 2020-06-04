@@ -12,7 +12,7 @@ URL_FOR_CREATE_SNAP_FUNCTION = 'https://us-central1-debuggermonitoring.cloudfunc
 db = firestore.Client()
 
 while True:
-    time.sleep(1)
+    time.sleep(10)
     tz = pytz.timezone("Zulu")
     now = datetime.now(tz)
     users = db.collection(u'users').stream()
