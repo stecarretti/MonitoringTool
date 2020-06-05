@@ -1,17 +1,16 @@
 from flask import Flask, render_template, request
 from google.cloud import firestore
 from datetime import datetime
-from utils import check_user_app
 import json
 import pytz
 import numpy as np
+
+from utils import check_user_app
 from metrics.metrics import get_stats, get_graphs
 
 
 app = Flask(__name__)
 db = firestore.Client()
-
-stats = None
 
 
 @app.route('/delete/<user_id>/<project_id>')
@@ -102,9 +101,12 @@ def logging():
             if check_user and user_ref.get().exists:
                 return render_template('error.html', key='Error: username already existing')
             # try to access to user's application
-            debuggee_id = check_user_app(keys, project_number, project_id)
-            if not debuggee_id:
-                print("Debuggee not found")
+            try:
+                debuggee_id = check_user_app(keys, project_number, project_id)
+                if not debuggee_id:
+                    raise Exception('Debuggee not found')
+            except Exception as e:
+                # print(e)
                 return render_template('error.html', key="Error: your application is unreachable. "
                                                          "Check if all submissions are correct. If it's all corret, "
                                                          "it means that your application is not been used for too long. "
@@ -158,7 +160,7 @@ def logging():
                 return render_template('error.html', key='Error: Breakpoints format not valid')
             return render_template('metrics_link.html', link=f'/metrics/{username}/{project_id}')
         except Exception as e:
-            print(e)
+            # print(e)
             return render_template('error.html', key='Error: Missing input. Each field must be filled.')
 
 
