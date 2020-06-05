@@ -169,12 +169,16 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')
     if request.method == 'POST':
-        username = request.form['username']
-        project = request.form['project']
-        user_ref = db.collection(u'users').document(username).collection(u'projects').document(project)
-        if not user_ref.get().exists:
+        try:
+            username = request.form['username']
+            project = request.form['project']
+            user_ref = db.collection(u'users').document(username).collection(u'projects').document(project)
+            if not user_ref.get().exists:
+                raise Exception('Document not found')
+            return render_template('metrics_link.html', link=f'/metrics/{username}/{project}')
+        except Exception as e:
+            # print(e)
             return render_template('error.html', key='Error: Username or project not existing')
-        return render_template('metrics_link.html', link=f'/metrics/{username}/{project}')
 
 
 if __name__ == '__main__':
