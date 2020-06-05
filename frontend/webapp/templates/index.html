@@ -10,7 +10,7 @@
         <br><h5>This tool relies on Google Cloud Debugger, that has to be active in your application.</h5>
         <h5>Here's the <a href="https://cloud.google.com/debugger/docs" target="_blank">documentation</a> of Cloud Debugger.</h5>
         <br><h3><kbd class="minor_kbd">Go to your project</kbd></h3>
-        <form method="POST" action="{{ url_for('index') }}" autocomplete="off">
+        <form method="POST" action="{{ url_for('index') }}">
             <input type="text" name="username" placeholder="Username"><br>
             <input type="text" name="project" placeholder="Project id"><br>
             <input type="submit" class="btn btn-light btn-sm" value="Submit">
