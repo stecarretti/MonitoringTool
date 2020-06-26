@@ -6,7 +6,5 @@
 - Cloud Functions
 - Cloud Firestore
 - Cloud Endpoints
-### Link to the website
-https://debuggermonitoring.ew.r.appspot.com/
 
 
