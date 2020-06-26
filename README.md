@@ -6,5 +6,6 @@
 - Cloud Functions
 - Cloud Firestore
 - Cloud Endpoints
+### Cloud Debugger isn't inside the previous list because it's used inside users' applications, not inside MonitoringTool
 
 
